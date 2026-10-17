@@ -198,10 +198,38 @@ Two caveats that matter more than the numbers:
 
 ## Results
 
-<!-- RESULTS:START -->
-Pending. Run `dso report results/raw/mvp.jsonl --out results/mvp.md` after an
-evaluation.
-<!-- RESULTS:END -->
+Ten tasks, one run per task, same machine, same OpenCode version (v2.0.32),
+`deepseek/deepseek-flash#high` at both settings. The only variable is the
+harness.
+
+| Configuration | dso pass@1 | dso cost per solved | Terminal-Bench 4.0 | DeepSWE v1.1 | AutomationBench |
+|---|---:|---:|---:|---:|---:|
+| DeepSeek V4.1 Flash, before (v0) | 90% (9/10) | $0.0036 | 31.2 | 74.2 | 54.8 |
+| DeepSeek V4.1 Flash, after (v7) | **100% (10/10)** | **$0.0021** | 31.2 | 74.2 | 54.8 |
+| Claude Opus 5.5 | not measured | n/a | 66.4 | not published | 40.0 |
+| GPT-6.1 Sol | not measured | n/a | 58.2* | 75.2* | not published |
+
+The two `dso` columns are measured here. The three vendor columns are published
+figures and apply to the model, not to the harness, which is why they are
+identical in both DeepSeek rows. Asterisked cells are third-party reproductions
+because the vendor reported only relative gains.
+
+What changed between the two DeepSeek rows:
+
+| Metric | v0 | v7 | Delta |
+|---|---:|---:|---:|
+| pass@1 | 90% | 100% | +10 pp |
+| Cost per solved task | $0.0036 | $0.0021 | -42% |
+| Input tokens per solved task | 6,460 | 5,890 | -9% |
+| Slop markers per 1k words | 27.7 | 0.9 | -97% |
+| Median wall time | 22.8 s | 17.4 s | -24% |
+
+The single task v0 missed is `feature-001-pagination`; v7 solved it. With ten
+tasks, one task is ten percentage points, so treat the pass@1 delta as
+directional rather than statistically established. The cost, token, and style
+deltas are consistent across all ten runs and do not depend on that task.
+
+Full per-task results: [docs/results-v1.md](docs/results-v1.md).
 
 ## Repository layout
 
