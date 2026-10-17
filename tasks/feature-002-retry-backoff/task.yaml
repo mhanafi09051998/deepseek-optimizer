@@ -1,0 +1,17 @@
+id: feature-002-retry-backoff
+category: feature
+difficulty: 2
+language: python
+title: Retry with exponential backoff and jitter
+prompt: 'Rework call_with_retry in retry.py to use exponential backoff with jitter. Signature: call_with_retry(fn,
+  *, max_attempts=4, base_delay=0.01, max_delay=0.2, sleep=time.sleep). Only RetryableError is retried;
+  any other exception propagates immediately without another call. After a failed attempt i (0-based),
+  wait a random duration in [cap/2, cap] where cap = min(base_delay * 2**i, max_delay), using the injected
+  sleep. Return fn''s value on success. If every attempt fails, re-raise the last RetryableError. Raise
+  ValueError when max_attempts is less than 1.'
+limits:
+  max_minutes: 10
+  max_files_changed: 2
+grade:
+  type: pytest
+  timeout: 120

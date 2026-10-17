@@ -1,0 +1,29 @@
+# Runs and local artifacts
+runs/
+results/raw/
+*.jsonl
+*.log
+
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+
+# Node
+node_modules/
+
+# Secrets
+.env
+.env.local
+
+# Editors / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db

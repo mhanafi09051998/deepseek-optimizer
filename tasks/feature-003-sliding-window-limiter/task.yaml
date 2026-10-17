@@ -1,0 +1,17 @@
+id: feature-003-sliding-window-limiter
+category: feature
+difficulty: 3
+language: python
+title: Thread-safe sliding window rate limiter
+prompt: 'Implement SlidingWindowLimiter in limiter.py. Constructor: (limit, window_seconds, clock=time.monotonic).
+  Method: allow(key) -> bool. A call is allowed when the number of allowed calls for that key inside the
+  window is below limit; the window at time t covers (t - window_seconds, t], so an event exactly window_seconds
+  old is already outside it. Keys are independent. The limiter must be safe under concurrent calls: with
+  N threads racing on one key, exactly limit calls are allowed. The constructor must raise ValueError
+  for a non-positive limit or window. Do not change the module name or the class name.'
+limits:
+  max_minutes: 15
+  max_files_changed: 2
+grade:
+  type: pytest
+  timeout: 120

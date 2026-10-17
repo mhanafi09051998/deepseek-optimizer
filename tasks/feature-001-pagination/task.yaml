@@ -1,0 +1,16 @@
+id: feature-001-pagination
+category: feature
+difficulty: 2
+language: python
+title: Add cursor pagination to the item store
+prompt: Add a paginate(items, limit=10, cursor=None) function to store.py. It returns a tuple (page, next_cursor).
+  page is a list of at most limit items starting after the position encoded by cursor; None means the
+  first page. next_cursor is an opaque string when more items remain and None on the last page. Walking
+  pages with the returned cursor must yield every item exactly once, in order. Raise ValueError when limit
+  is not positive or when cursor is not a valid cursor produced by this function. Do not change list_items().
+limits:
+  max_minutes: 10
+  max_files_changed: 2
+grade:
+  type: pytest
+  timeout: 120

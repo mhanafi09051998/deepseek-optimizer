@@ -1,0 +1,16 @@
+id: refactor-001-split-parser
+category: refactor
+difficulty: 2
+language: python
+title: Extract value parsing into its own module
+prompt: 'config_parser.py currently parses scalar and list values inside parse_value. Extract that logic
+  into a new module parsing.py exposing parse_value(text). config_parser.py must import it and re-export
+  it so that config_parser.parse_value is the same object as parsing.parse_value. Behavior of parse_config
+  and parse_value must not change: quoted strings, true/false, ints, floats, bracketed lists, comments,
+  blank lines, and the ValueError raised for a line without ''=''.'
+limits:
+  max_minutes: 10
+  max_files_changed: 3
+grade:
+  type: pytest
+  timeout: 120

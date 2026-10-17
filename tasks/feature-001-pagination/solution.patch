@@ -1,0 +1,42 @@
+diff --git a/store.py b/store.py
+index f6071c4..aae197c 100644
+--- a/store.py
++++ b/store.py
+@@ -1,7 +1,37 @@
+ """In-memory item store."""
+ 
++import base64
++
+ ITEMS = [f"item-{index:03d}" for index in range(1, 26)]
+ 
+ 
+ def list_items() -> list[str]:
+     return list(ITEMS)
++
++
++def _encode(position: int) -> str:
++    return base64.urlsafe_b64encode(str(position).encode("ascii")).decode("ascii")
++
++
++def _decode(cursor: str) -> int:
++    try:
++        position = int(base64.urlsafe_b64decode(cursor.encode("ascii")).decode("ascii"))
++    except Exception as exc:  # noqa: BLE001
++        raise ValueError("invalid cursor") from exc
++    if position < 0:
++        raise ValueError("invalid cursor")
++    return position
++
++
++def paginate(items: list[str], limit: int = 10, cursor: str | None = None):
++    if limit <= 0:
++        raise ValueError("limit must be positive")
++
++    start = 0 if cursor is None else _decode(cursor)
++    if start > len(items):
++        raise ValueError("invalid cursor")
++
++    page = list(items[start : start + limit])
++    end = start + limit
++    next_cursor = _encode(end) if end < len(items) else None
++    return page, next_cursor

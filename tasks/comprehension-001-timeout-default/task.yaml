@@ -1,0 +1,15 @@
+id: comprehension-001-timeout-default
+category: comprehension
+difficulty: 1
+language: python
+title: Find the effective default HTTP timeout
+prompt: 'Trace how the HTTP client gets its default timeout. Then write answer.json at the repository
+  root with exactly three keys: "file" (repository-relative path of the module that defines the effective
+  default), "symbol" (the name of the constant), and "value" (its numeric value in seconds). Do not modify
+  any other file.'
+limits:
+  max_minutes: 8
+  max_files_changed: 2
+grade:
+  type: pytest
+  timeout: 120

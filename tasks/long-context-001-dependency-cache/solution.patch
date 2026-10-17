@@ -1,0 +1,20 @@
+diff --git a/cache/store.py b/cache/store.py
+index d1c79f2..b554dc8 100644
+--- a/cache/store.py
++++ b/cache/store.py
+@@ -33,5 +33,13 @@ class Store:
+         return entry.value
+ 
+     def invalidate(self, key):
+-        self._data.pop(key, None)
+-        self._graph.discard(key)
++        pending = [key]
++        seen = set()
++        while pending:
++            current = pending.pop()
++            if current in seen:
++                continue
++            seen.add(current)
++            self._data.pop(current, None)
++            pending.extend(self._graph.dependents(current))
++            self._graph.discard(current)

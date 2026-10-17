@@ -1,0 +1,17 @@
+id: tests-001-merge-ranges
+category: tests
+difficulty: 2
+language: python
+title: Write tests that expose the adjacent-range bug
+prompt: merge_ranges in ranges.py is supposed to merge closed integer intervals that overlap OR touch
+  (for example (1, 3) and (4, 6) must become (1, 6)). It currently does not merge touching intervals.
+  Write tests in tests_written/test_ranges.py that fail against the current code and pass once the bug
+  is fixed. Provide at least two test functions and cover the touching case as well as a property that
+  must stay true. Do not change ranges.py.
+limits:
+  max_minutes: 10
+  max_files_changed: 2
+grade:
+  type: mutation
+  test_file: tests_written/test_ranges.py
+  timeout: 120

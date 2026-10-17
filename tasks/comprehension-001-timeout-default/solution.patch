@@ -1,0 +1,11 @@
+diff --git a/answer.json b/answer.json
+new file mode 100644
+index 0000000..e48e2d9
+--- /dev/null
++++ b/answer.json
+@@ -0,0 +1,5 @@
++{
++  "file": "settings/network.py",
++  "symbol": "DEFAULT_TIMEOUT_SECONDS",
++  "value": 30
++}

@@ -1,0 +1,48 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - run: pip install -e ".[dev]"
+      - run: ruff check src
+      - name: Validate tasks
+        run: dso validate
+
+  smoke-eval:
+    # Requires a provider credential and a pre-authenticated OpenCode install.
+    # Skipped on forks and pull requests without secrets.
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "24"
+      - run: pip install -e .
+      - name: Install OpenCode
+        run: curl -fsSL https://opencode.ai/install | bash
+      - name: Smoke eval
+        env:
+          DEEPSEEK_API_KEY: ${{ secrets.DEEPSEEK_API_KEY }}
+        run: |
+          dso eval --tasks bugfix-002-money-remainder \
+            --models deepseek/deepseek-flash#low \
+            --harnesses v0 --repeats 1 \
+            --out results/raw/ci.jsonl

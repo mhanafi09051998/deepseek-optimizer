@@ -1,0 +1,15 @@
+id: bugfix-002-money-remainder
+category: bugfix
+difficulty: 1
+language: python
+title: Bill split loses the remainder
+prompt: split_bill(total_cents, people) in money.py divides a bill and silently drops the remainder, so
+  the shares do not add up to the total. Fix it so the returned shares sum exactly to total_cents, no
+  two shares differ by more than one cent, and the larger shares come first. Negative totals must raise
+  ValueError, and a non-positive people count must keep raising ValueError.
+limits:
+  max_minutes: 8
+  max_files_changed: 2
+grade:
+  type: pytest
+  timeout: 120

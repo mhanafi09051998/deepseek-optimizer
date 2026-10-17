@@ -1,0 +1,38 @@
+diff --git a/limiter.py b/limiter.py
+index 1b97cf6..98977f0 100644
+--- a/limiter.py
++++ b/limiter.py
+@@ -1,17 +1,29 @@
+ """Sliding window rate limiter."""
+ 
++import threading
+ import time
+ 
+ 
+ class SlidingWindowLimiter:
+     def __init__(self, limit, window_seconds, clock=time.monotonic):
++        if limit <= 0:
++            raise ValueError("limit must be positive")
++        if window_seconds <= 0:
++            raise ValueError("window_seconds must be positive")
+         self.limit = limit
+         self.window_seconds = window_seconds
+         self._clock = clock
+         self._events = {}
++        self._lock = threading.Lock()
+ 
+     def allow(self, key):
+-        now = self._clock()
+-        events = self._events.setdefault(key, [])
+-        events.append(now)
+-        return len(events) <= self.limit
++        with self._lock:
++            now = self._clock()
++            cutoff = now - self.window_seconds
++            events = self._events.setdefault(key, [])
++            while events and events[0] <= cutoff:
++                events.pop(0)
++            if len(events) >= self.limit:
++                return False
++            events.append(now)
++            return True

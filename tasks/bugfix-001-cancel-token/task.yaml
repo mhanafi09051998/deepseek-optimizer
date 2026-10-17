@@ -1,0 +1,16 @@
+id: bugfix-001-cancel-token
+category: bugfix
+difficulty: 2
+language: python
+title: Cancellation is ignored inside a job
+prompt: 'The job runner in jobs.py only notices cancellation between jobs, so a cancel request that arrives
+  while a job is in progress lets that job run to completion. Fix JobRunner so cancellation is observed
+  between work steps: after cancel() is called, the running job must stop within one step, its status
+  must become ''cancelled'', and run() must return that job. A run that is not cancelled must still execute
+  every job and every step exactly as before.'
+limits:
+  max_minutes: 8
+  max_files_changed: 2
+grade:
+  type: pytest
+  timeout: 120

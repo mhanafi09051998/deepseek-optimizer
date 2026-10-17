@@ -1,0 +1,14 @@
+diff --git a/money.py b/money.py
+index c44612d..4e51855 100644
+--- a/money.py
++++ b/money.py
+@@ -4,5 +4,7 @@
+ def split_bill(total_cents: int, people: int) -> list[int]:
+     if people <= 0:
+         raise ValueError("people must be positive")
+-    base = total_cents // people
+-    return [base] * people
++    if total_cents < 0:
++        raise ValueError("total_cents must not be negative")
++    base, remainder = divmod(total_cents, people)
++    return [base + 1] * remainder + [base] * (people - remainder)

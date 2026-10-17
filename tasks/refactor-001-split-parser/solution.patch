@@ -1,0 +1,62 @@
+diff --git a/config_parser.py b/config_parser.py
+index d8197dc..73f4d1c 100644
+--- a/config_parser.py
++++ b/config_parser.py
+@@ -1,26 +1,8 @@
+ """Tiny key=value config parser."""
+ 
++from parsing import parse_value
+ 
+-def parse_value(text):
+-    text = text.strip()
+-    if len(text) >= 2 and text.startswith('"') and text.endswith('"'):
+-        return text[1:-1]
+-    if text.lower() in ("true", "false"):
+-        return text.lower() == "true"
+-    try:
+-        return int(text)
+-    except ValueError:
+-        pass
+-    try:
+-        return float(text)
+-    except ValueError:
+-        pass
+-    if text.startswith("[") and text.endswith("]"):
+-        inner = text[1:-1].strip()
+-        if not inner:
+-            return []
+-        return [parse_value(part) for part in inner.split(",")]
+-    return text
++__all__ = ["parse_config", "parse_value"]
+ 
+ 
+ def parse_config(source):
+diff --git a/parsing.py b/parsing.py
+new file mode 100644
+index 0000000..46273bf
+--- /dev/null
++++ b/parsing.py
+@@ -0,0 +1,23 @@
++"""Value parsing for the key=value config format."""
++
++
++def parse_value(text):
++    text = text.strip()
++    if len(text) >= 2 and text.startswith('"') and text.endswith('"'):
++        return text[1:-1]
++    if text.lower() in ("true", "false"):
++        return text.lower() == "true"
++    try:
++        return int(text)
++    except ValueError:
++        pass
++    try:
++        return float(text)
++    except ValueError:
++        pass
++    if text.startswith("[") and text.endswith("]"):
++        inner = text[1:-1].strip()
++        if not inner:
++            return []
++        return [parse_value(part) for part in inner.split(",")]
++    return text

@@ -1,0 +1,14 @@
+diff --git a/jobs.py b/jobs.py
+index c2033fd..c3d0f74 100644
+--- a/jobs.py
++++ b/jobs.py
+@@ -30,6 +30,9 @@ class JobRunner:
+                 return job
+             job.status = "running"
+             for step in range(5):
++                if self.cancelled:
++                    job.status = "cancelled"
++                    return job
+                 time.sleep(0.01)
+                 job.result.append(f"step-{step}")
+             job.status = "done"

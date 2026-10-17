@@ -1,0 +1,9 @@
+* text=auto eol=lf
+
+# Patches must keep LF endings or they will not apply on Windows checkouts.
+*.patch text eol=lf
+*.py text eol=lf
+*.ts text eol=lf
+*.json text eol=lf
+*.yaml text eol=lf
+*.md text eol=lf

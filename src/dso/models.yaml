@@ -1,0 +1,60 @@
+# Model registry.
+#
+# IDs use OpenCode's model reference format: provider/model#variant
+# Override the registry path with DSO_MODELS_FILE, or pass --model with a raw ID.
+#
+# `pricing` is only a fallback for reporting when the runner cannot read the
+# per-run cost reported by the provider. USD per million tokens.
+
+models:
+  flash-low:
+    id: deepseek/deepseek-flash#low
+    label: DeepSeek V4.1 Flash (low)
+    pricing: { input: 0.15, output: 0.60, cache_read: 0.003 }
+
+  flash-high:
+    id: deepseek/deepseek-flash#high
+    label: DeepSeek V4.1 Flash (high)
+    pricing: { input: 0.15, output: 0.60, cache_read: 0.003 }
+
+  flash-max:
+    id: deepseek/deepseek-flash#max
+    label: DeepSeek V4.1 Flash (max)
+    pricing: { input: 0.15, output: 0.60, cache_read: 0.003 }
+
+  # Cross-model reference points. Same tasks, same harness, different model.
+  opus-5-5:
+    id: openrouter/anthropic/claude-opus-5.5#high
+    label: Claude Opus 5.5 (high)
+    pricing: { input: 4.0, output: 20.0, cache_read: 0.2 }
+
+  gpt-6-1-sol:
+    id: openrouter/openai/gpt-6.1-sol#high
+    label: GPT-6.1 Sol (high)
+    pricing: { input: 2.0, output: 10.0, cache_read: 0.1 }
+
+harnesses:
+  v0:
+    label: Baseline
+    description: No agent instructions. Raw prompt in, work out.
+  v1:
+    label: Prompt pack
+    description: Plan, act, verify workflow and explicit tool policy.
+  v2:
+    label: Context strategy
+    description: Grep first, read selectively, never dump whole files.
+  v3:
+    label: Verify loop
+    description: v2 plus a mandatory test run and self-review before finishing.
+  v4:
+    label: Subagents
+    description: v3 plus explorer/implementer/reviewer role separation.
+  v5:
+    label: Combined
+    description: Converged v2+v3+v4 configuration.
+  v6:
+    label: Combined + output hygiene
+    description: v5 plus a strict no-slop contract for the final reply.
+  v7:
+    label: Lean
+    description: v6 plus a hard token budget and one-pass editing.

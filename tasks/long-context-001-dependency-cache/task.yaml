@@ -1,0 +1,17 @@
+id: long-context-001-dependency-cache
+category: long-context
+difficulty: 3
+language: python
+title: Cache invalidation does not cascade to dependents
+prompt: The cache in the cache/ package lets an entry declare depends_on keys, but invalidating a key
+  leaves its dependents in place, and an entry that expires through its TTL also leaves dependents in
+  place. Trace how set(), get(), and invalidate() interact across cache/api.py, cache/store.py, and cache/deps.py,
+  then fix invalidation so it removes the key and every transitive dependent. An explicit invalidate()
+  and a TTL expiry must both cascade. Unrelated entries must survive, and an entry must not be removed
+  twice or loop forever in a dependency cycle.
+limits:
+  max_minutes: 15
+  max_files_changed: 3
+grade:
+  type: pytest
+  timeout: 120

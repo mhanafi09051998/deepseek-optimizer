@@ -1,0 +1,15 @@
+id: bugfix-003-slugify-ts
+category: bugfix
+difficulty: 1
+language: typescript
+title: Slugify leaves punctuation and diacritics
+prompt: 'slugify in slug.ts is too naive. Make it: lowercase the input, remove diacritics, replace every
+  run of characters outside a-z0-9 with a single dash, and strip leading and trailing dashes. An input
+  with no letters or digits must return an empty string. Keep the function signature and the module exports
+  unchanged.'
+limits:
+  max_minutes: 8
+  max_files_changed: 2
+grade:
+  type: node
+  timeout: 120

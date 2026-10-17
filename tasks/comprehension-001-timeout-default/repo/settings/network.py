@@ -1,0 +1,10 @@
+"""Network settings."""
+
+DEFAULT_TIMEOUT_SECONDS = 30
+DEFAULT_RETRIES = 2
+
+
+DEFAULTS = {
+    "timeout": DEFAULT_TIMEOUT_SECONDS,
+    "retries": DEFAULT_RETRIES,
+}

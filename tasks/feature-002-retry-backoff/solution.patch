@@ -1,0 +1,40 @@
+diff --git a/retry.py b/retry.py
+index effd634..b5006e9 100644
+--- a/retry.py
++++ b/retry.py
+@@ -1,5 +1,6 @@
+ """Retry helper."""
+ 
++import random
+ import time
+ 
+ 
+@@ -11,11 +12,22 @@ class FatalError(Exception):
+     """A failure that must never be retried."""
+ 
+ 
+-def call_with_retry(fn, max_attempts=3):
+-    last = None
+-    for _ in range(max_attempts):
++def call_with_retry(
++    fn,
++    *,
++    max_attempts=4,
++    base_delay=0.01,
++    max_delay=0.2,
++    sleep=time.sleep,
++):
++    if max_attempts < 1:
++        raise ValueError("max_attempts must be at least 1")
++
++    for attempt in range(max_attempts):
+         try:
+             return fn()
+-        except Exception as exc:  # noqa: BLE001
+-            last = exc
+-    raise last
++        except RetryableError:
++            if attempt == max_attempts - 1:
++                raise
++            cap = min(base_delay * (2**attempt), max_delay)
++            sleep(random.uniform(cap / 2, cap))
