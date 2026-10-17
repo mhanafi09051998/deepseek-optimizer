@@ -1,4 +1,4 @@
-# Model registry.
+﻿# Model registry.
 #
 # IDs use OpenCode's model reference format: provider/model#variant
 # Override the registry path with DSO_MODELS_FILE, or pass --model with a raw ID.
@@ -70,3 +70,13 @@ harnesses:
   v11:
     label: Truncated tool output
     description: v7 plus a plugin that cuts every tool result at 4000 chars.
+
+  v12:
+    label: Strict output
+    description: v7 plus a no-format output contract for slop near zero.
+  v13:
+    label: Error-safe truncation
+    description: v12 plus an 8000 char cap that always keeps the error tail.
+  v14:
+    label: Hypothesis ladder
+    description: v13 plus ranked causes, discriminating tests, and an access-failure protocol.

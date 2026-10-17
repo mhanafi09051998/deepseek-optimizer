@@ -1,4 +1,4 @@
-# deepseek-optimizer
+﻿# deepseek-optimizer
 
 Harness optimization for coding agents. Same model, same tasks, different
 scaffold. Everything is measured, nothing is vibes.
@@ -82,6 +82,7 @@ No fine-tuning, no distillation, no vendor benchmark reproduction.
 | v11 | plugin: truncate tool output at 4000 chars | -5% cost, tokens within noise |
 | v12 | v7 plus strict no-format output contract | slop near zero |
 | v13 | v12 plus error-safe truncation at 8000 chars | slop 0.0, fastest run |
+| v14 | hypothesis ladder and access-failure protocol | diagnosis before edits |
 
 ## Quick start
 
@@ -119,6 +120,8 @@ docs/        methodology and full per-task results
 3. Vendor numbers use different scaffolds. They motivate the work, not prove it.
 
 Full methodology: [docs/methodology.md](docs/methodology.md).
+Diagnosis playbook: [docs/playbook.md](docs/playbook.md).
+Orchestration guide: [docs/orchestration.md](docs/orchestration.md).
 Per-task results: [docs/results-v1.md](docs/results-v1.md).
 
 ## License
