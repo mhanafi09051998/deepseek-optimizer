@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+import ast
 import json
 import shutil
 import time
@@ -85,6 +86,47 @@ def diff_stats(workspace: Path) -> tuple[int, int]:
     return len(paths), lines
 
 
+def write_repo_map(workspace: Path) -> None:
+    """Write a deterministic symbol map so the agent can skip blind search."""
+    lines = ["# Repository map", "", "Generated file. Do not edit.", ""]
+    for path in sorted(workspace.rglob("*")):
+        if not path.is_file() or ".git" in path.parts:
+            continue
+        if path.suffix not in {".py", ".ts", ".js", ".tsx"}:
+            continue
+        relative = path.relative_to(workspace).as_posix()
+        if relative.startswith("."):
+            continue
+        try:
+            source = path.read_text(encoding="utf-8")
+        except OSError:
+            continue
+        symbols: list[str] = []
+        if path.suffix == ".py":
+            try:
+                tree = ast.parse(source)
+            except SyntaxError:
+                continue
+            for node in tree.body:
+                if isinstance(node, (ast.FunctionDef, ast.AsyncFunctionDef)):
+                    symbols.append(f"def {node.name} (line {node.lineno})")
+                elif isinstance(node, ast.ClassDef):
+                    symbols.append(f"class {node.name} (line {node.lineno})")
+        else:
+            for number, row in enumerate(source.splitlines(), start=1):
+                stripped = row.strip()
+                if stripped.startswith(("export function", "export class", "function ", "class ")):
+                    symbols.append(f"{stripped[:80]} (line {number})")
+        total = len(source.splitlines())
+        lines.append(f"## {relative} ({total} lines)")
+        if symbols:
+            lines.extend(f"- {symbol}" for symbol in symbols)
+        else:
+            lines.append("- no top-level symbols")
+        lines.append("")
+    (workspace / ".dso_map.md").write_text("\n".join(lines), encoding="utf-8")
+
+
 def run_one(
     task: Task,
     *,
@@ -113,6 +155,9 @@ def run_one(
         _git_exclude(workspace, IGNORED_ARTIFACTS)
     else:
         apply_harness(workspace, harness)
+        if harness == "v9":
+            write_repo_map(workspace)
+            _git_exclude(workspace, [".dso_map.md"])
 
     timeout = int(task.max_minutes * 60 * timeout_scale)
     started = datetime.now(UTC)
@@ -142,6 +187,8 @@ def run_one(
         detail = f"test configuration modified: {', '.join(violations)}"
 
     style = analyze(agent.text_parts)
+    cache_total = agent.tokens["cache_read"] + agent.tokens["input"]
+    cache_ratio = round(agent.tokens["cache_read"] / cache_total, 4) if cache_total else 0.0
     record = {
         "schema": 2,
         "timestamp": started.isoformat(timespec="seconds"),
@@ -160,6 +207,10 @@ def run_one(
         "cost_usd": round(agent.cost_usd, 6),
         "tokens": agent.tokens,
         "steps": agent.steps,
+        "tool_calls": agent.tool_calls,
+        "tool_output_chars": agent.tool_output_chars,
+        "tool_calls_by_name": agent.tool_calls_by_name,
+        "cache_ratio": cache_ratio,
         "files_changed": files_changed,
         "diff_lines": diff_lines,
         "response_words": style["words"],

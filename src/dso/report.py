@@ -76,6 +76,13 @@ def aggregate(records: list[dict]) -> list[dict]:
                 "mean_slop_per_1k": statistics.fmean(
                     item.get("slop_per_1k_words", 0.0) for item in items
                 ),
+                "mean_tool_calls": statistics.fmean(item.get("tool_calls", 0) for item in items),
+                "mean_cache_ratio": statistics.fmean(
+                    item.get("cache_ratio", 0.0) for item in items
+                ),
+                "mean_tool_output_chars": statistics.fmean(
+                    item.get("tool_output_chars", 0) for item in items
+                ),
                 "mean_response_words": statistics.fmean(
                     item.get("response_words", 0) for item in items
                 ),
@@ -100,14 +107,15 @@ def render(records: list[dict]) -> str:
         "## Model x harness",
         "",
         "| Model | Harness | Runs | pass@1 | 95% CI | Cost total | Cost / solved "
-        "| Tok / solved | Median s | Input tok | Files | Slop /1k |",
-        "|---|---|---:|---:|---|---:|---:|---:|---:|---:|---:|---:|",
+        "| Tok / solved | Median s | Input tok | Files | Slop /1k | Tools | Cache |",
+        "|---|---|---:|---:|---|---:|---:|---:|---:|---:|---:|---:|---:|---:|",
     ]
     for row in rows:
         tps = row["input_tokens_per_solved"]
         lines.append(
             "| {model} | {harness} | {runs} | {rate:.1%} | {lo:.0%}-{hi:.0%} | {cost} | {cps} | "
-            "{tps} | {dur:.1f} | {tok:.0f} | {files:.1f} | {slop:.2f} |".format(
+            "{tps} | {dur:.1f} | {tok:.0f} | {files:.1f} | {slop:.2f} | {tools:.1f} | {cache:.0%} |"
+            .format(
                 model=row["model"],
                 harness=row["harness"],
                 runs=row["runs"],
@@ -121,6 +129,8 @@ def render(records: list[dict]) -> str:
                 tok=row["mean_input_tokens"],
                 files=row["mean_files_changed"],
                 slop=row["mean_slop_per_1k"],
+                tools=row["mean_tool_calls"],
+                cache=row["mean_cache_ratio"],
             )
         )
 

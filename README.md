@@ -75,6 +75,8 @@ which combines the winners.
 | `v5` | converged configuration | combination outperforms each part |
 | `v6` | v5 plus a no-slop output contract | style is part of the product |
 | `v7` | v6 plus a token budget and one-pass editing | same correctness, fewer tokens |
+| `v8` | hard caps on tool calls and read ranges | most tokens are tool output |
+| `v9` | v8 plus a generated symbol map | less blind search, stable cache prefix |
 
 Harness files live in `harness/vN/AGENTS.md`. They are copied into the workspace
 and git-excluded, so they never appear in the measured diff.
@@ -87,6 +89,8 @@ and git-excluded, so they never appear in the measured diff.
 | **cost per solved task** | the number that decides adoption |
 | **input tokens per solved task** | context efficiency at equal accuracy |
 | **files changed / diff lines** | precision, not just success |
+| **tool calls and tool output size** | where the input tokens actually go |
+| **cache hit ratio** | share of input served from the cheap cache tier |
 | **slop per 1k words** | output quality, not just output length |
 | **median wall time** | throughput |
 

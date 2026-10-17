@@ -65,13 +65,18 @@ class AgentResult:
     timed_out: bool = False
     stderr: str = ""
     text_parts: list[str] = field(default_factory=list)
+    tool_calls: int = 0
+    tool_output_chars: int = 0
+    tool_calls_by_name: dict[str, int] = field(default_factory=dict)
 
 
-def _parse(stdout: str) -> tuple[float, dict[str, int], int, list[str]]:
+def _parse(stdout: str) -> tuple[float, dict[str, int], int, list[str], dict[str, int], int]:
     cost = 0.0
     tokens = {"input": 0, "output": 0, "reasoning": 0, "cache_read": 0, "cache_write": 0}
     steps = 0
     texts: list[str] = []
+    tools: dict[str, int] = {}
+    tool_chars = 0
 
     for line in stdout.splitlines():
         line = line.strip()
@@ -88,6 +93,14 @@ def _parse(stdout: str) -> tuple[float, dict[str, int], int, list[str]]:
             if isinstance(text, str) and text.strip():
                 texts.append(text)
             continue
+        if event.get("type") == "tool":
+            name = str(part.get("tool") or "unknown")
+            state = part.get("state") or {}
+            output = state.get("output")
+            tools[name] = tools.get(name, 0) + 1
+            if isinstance(output, str):
+                tool_chars += len(output)
+            continue
         if event.get("type") != "step_finish":
             continue
 
@@ -101,7 +114,7 @@ def _parse(stdout: str) -> tuple[float, dict[str, int], int, list[str]]:
         tokens["cache_read"] += int(cache.get("read") or 0)
         tokens["cache_write"] += int(cache.get("write") or 0)
 
-    return cost, tokens, steps, texts
+    return cost, tokens, steps, texts, tools, tool_chars
 
 
 def execute(
@@ -146,7 +159,7 @@ def execute(
             stderr = stderr.decode("utf-8", "replace")
 
     log_path.write_text(stdout, encoding="utf-8")
-    cost, tokens, steps, texts = _parse(stdout)
+    cost, tokens, steps, texts, tools, tool_chars = _parse(stdout)
 
     return AgentResult(
         cost_usd=cost,
@@ -155,4 +168,7 @@ def execute(
         timed_out=timed_out,
         stderr=stderr[-2000:],
         text_parts=texts,
+        tool_calls=sum(tools.values()),
+        tool_output_chars=tool_chars,
+        tool_calls_by_name=tools,
     )

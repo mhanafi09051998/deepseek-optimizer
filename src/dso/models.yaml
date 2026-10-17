@@ -58,3 +58,9 @@ harnesses:
   v7:
     label: Lean
     description: v6 plus a hard token budget and one-pass editing.
+  v8:
+    label: Tool budget
+    description: Hard caps on tool calls, read ranges, and search count.
+  v9:
+    label: Tool budget + repo map
+    description: v8 plus a generated symbol map and cache-stable context.
