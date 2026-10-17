@@ -50,6 +50,17 @@ task set, the token budget in v7 was already binding. v14 adds a hypothesis ladd
 With ten tasks, one task equals ten percentage points. Treat the pass@1 delta as
 directional. The cost, token, and style deltas are consistent across all runs.
 
+### Stability, three repeats
+
+| Harness | Runs | pass@1 | Tokens / solved | Cost / solved | Slop /1k |
+|---|---:|---:|---:|---:|---:|
+| v0 | 30 | 96.7% (29/30) | 6,027 | $0.00304 | 24.1 |
+| v13 | 30 | 100% (30/30) | 5,895 | $0.00219 | 0.6 |
+
+One flake appeared: `tests-001-merge-ranges` failed once under v0 and passed in the
+other two repeats. Every other task passed 3/3 under both harnesses. The cost gap
+survives repetition; the pass-rate gap is still one task wide.
+
 ## How it works
 
 ```

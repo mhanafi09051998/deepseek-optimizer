@@ -54,6 +54,18 @@ Per task:
 | refactor-001-split-parser | refactor | pass | pass |
 | tests-001-merge-ranges | tests | pass | pass |
 
+## Stability
+
+Three repeats per task, 30 runs per harness:
+
+| Harness | pass@1 | Tokens / solved | Cost / solved | Slop /1k | Median |
+|---|---:|---:|---:|---:|---:|
+| v0 | 96.7% (29/30) | 6,027 | $0.00304 | 24.1 | 22.6 s |
+| v13 | 100% (30/30) | 5,895 | $0.00219 | 0.6 | 23.4 s |
+
+One flake: `tests-001-merge-ranges` failed once under v0. Every other task passed
+3/3 under both harnesses, so the only stable difference is cost and output style.
+
 ## Observations
 
 1. The task set has a ceiling effect. Eight of ten tasks pass without any harness
