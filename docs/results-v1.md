@@ -7,12 +7,14 @@ Status: pilot. Ten tasks, one repeat per cell, one host.
 | Field | Value |
 |---|---|
 | Model | `deepseek/deepseek-flash#high` |
-| Reference models | `openrouter/anthropic/claude-opus-5.5#high`, `openrouter/openai/gpt-6.1-sol#high` |
 | Tasks | 10, six categories |
 | Harnesses | v0 (control), v6 (no-slop), v7 (lean) |
 | Repeats | 1 |
 | Grader | hidden pytest / node / mutation suites |
-| OpenCode | recorded per run in `results/raw/compare.jsonl` |
+| OpenCode | recorded per run in `results/raw/deepseek.jsonl` |
+
+Cross-model figures in the README are vendor-published numbers, not runs from
+this harness. They are labelled and sourced separately.
 
 ## Results
 

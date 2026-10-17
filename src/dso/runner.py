@@ -98,9 +98,14 @@ def run_one(
 ) -> dict:
     run_id = f"{task.id}__{model_key}__{harness}__r{repeat}"
     run_dir = run_root / run_id
-    workspace = run_dir / "workspace"
     rmtree(run_dir)
-    run_dir.mkdir(parents=True)
+    if run_dir.exists():
+        # A process may still hold the directory on Windows. Never fail a run
+        # because of a stale workspace: fall back to a unique directory.
+        run_dir = run_root / f"{run_id}__{int(time.time())}"
+        rmtree(run_dir)
+    run_dir.mkdir(parents=True, exist_ok=True)
+    workspace = run_dir / "workspace"
 
     copy_repo(task, workspace)
     init_repo(workspace)

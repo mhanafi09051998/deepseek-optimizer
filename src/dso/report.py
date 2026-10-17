@@ -10,13 +10,24 @@ from pathlib import Path
 
 
 def load_records(paths: list[Path]) -> list[dict]:
-    records: list[dict] = []
+    records: dict[tuple, dict] = {}
+    order: list[tuple] = []
     for path in paths:
         for line in Path(path).read_text(encoding="utf-8").splitlines():
             line = line.strip()
-            if line:
-                records.append(json.loads(line))
-    return records
+            if not line:
+                continue
+            record = json.loads(line)
+            key = (
+                record.get("task"),
+                record.get("model_key"),
+                record.get("harness"),
+                record.get("repeat"),
+            )
+            if key not in records:
+                order.append(key)
+            records[key] = record
+    return [records[key] for key in order]
 
 
 def bootstrap_ci(values: list[float], iterations: int = 2000, seed: int = 7) -> tuple[float, float]:

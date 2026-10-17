@@ -148,6 +148,50 @@ package installs. See [CONTRIBUTING.md](CONTRIBUTING.md) to add one.
 - `solution.patch` proves every task is solvable; `dso validate` runs both
   directions on every commit.
 
+## Reference: vendor-published numbers
+
+This table is context, not a comparison with our results. These are numbers the
+vendors published, each measured with a different scaffold, effort setting, and
+harness. Scores in one column are not directly comparable to another column.
+
+| Benchmark | DeepSeek V4.1 Flash | Claude Opus 5.5 | GPT-6.1 Sol |
+|---|---:|---:|---:|
+| Terminal-Bench 4.0 | 31.2 | 66.4 | 58.2 ±3.1 |
+| DeepSWE v1.1 | 74.2 | not published | 75.2 |
+| AutomationBench | 54.8 | 40.0 | not published |
+| GPQA Diamond | 90.9 | not published | not published |
+| Humanity's Last Exam | 39.1 (no tools) | 67.7 (with tools) | not published |
+| FrontierCode v1.1 (Main) | not published | 54.4 | not published |
+| Terminal-Bench Science 0.1 | not published | 58.7 | not published |
+| OSWorld | not published | 81.8 (partial) | within 2.1 pp of Astra |
+
+Pricing, USD per million tokens:
+
+| Model | Input | Cached input | Output |
+|---|---:|---:|---:|
+| DeepSeek V4.1 Flash | 0.15 off-peak / 0.30 peak | 0.003 / 0.006 | 0.60 / 1.20 |
+| Claude Opus 5.5 | 4.00 | 0.20 | 20.00 |
+| GPT-6.1 Sol | 2.00 | 0.10 | 10.00 |
+
+Sources:
+
+- DeepSeek, V4.1 Flash model card, 10 Sep 2026.
+- Anthropic, "Introducing Claude Opus 5.5", 22 Sep 2026. Terminal-Bench 4.0 at
+  xhigh effort, AutomationBench at max effort.
+- OpenAI, "GPT-6.1 Sol", Sep 2026. The post reports relative gains for DeepSWE
+  and AutomationBench rather than a numeric table; the absolute Terminal-Bench
+  4.0 and DeepSWE figures above are third-party reproductions and are therefore
+  lower confidence than the other cells.
+
+Two caveats that matter more than the numbers:
+
+1. The HLE row compares tools against no tools. Do not read it as a capability
+   gap.
+2. DeepSeek's figures come from its own scaffolding table, where the same model
+   scored 65.5 to 74.2 on DeepSWE depending only on the harness. That spread,
+   8.7 points, is larger than the gap between the top models in the same
+   release, and it is the reason this repository exists.
+
 ## Results
 
 <!-- RESULTS:START -->
