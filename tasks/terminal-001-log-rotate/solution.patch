@@ -1,0 +1,32 @@
+diff --git a/logtool.py b/logtool.py
+index be95824..b0c0362 100644
+--- a/logtool.py
++++ b/logtool.py
+@@ -8,10 +8,23 @@ import os
+ def rotate(directory, keep):
+     if keep < 1:
+         raise ValueError("keep must be at least 1")
+-    files = sorted(glob.glob(os.path.join(directory, "*.log")))
+-    for index, path in enumerate(files):
+-        os.replace(path, f"{path}.{index + 1}")
+-    return files
++
++    for rotated in glob.glob(os.path.join(directory, "*.log.*")):
++        if os.path.isfile(rotated):
++            os.remove(rotated)
++
++    logs = [path for path in glob.glob(os.path.join(directory, "*.log")) if os.path.isfile(path)]
++    logs.sort(key=lambda path: (-os.path.getmtime(path), os.path.basename(path)))
++
++    produced = []
++    for index, path in enumerate(logs):
++        if index >= keep:
++            os.remove(path)
++            continue
++        target = f"{path}.{index + 1}"
++        os.replace(path, target)
++        produced.append(target)
++    return produced
+ 
+ 
+ def main(argv=None):

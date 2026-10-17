@@ -64,3 +64,6 @@ harnesses:
   v9:
     label: Tool budget + repo map
     description: v8 plus a generated symbol map and cache-stable context.
+  v10:
+    label: Recovery loop
+    description: v9 plus a bounded run-fix-rerun loop for long tasks.

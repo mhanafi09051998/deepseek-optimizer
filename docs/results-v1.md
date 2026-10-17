@@ -23,6 +23,11 @@ this harness. They are labelled and sourced separately.
 |---|---:|---:|---:|---:|---:|
 | v0 baseline | 90% (9/10) | $0.0036 | 6,460 | 27.7 | 22.8 s |
 | v7 lean | 100% (10/10) | $0.0021 | 5,890 | 0.9 | 17.4 s |
+| v8 tool budget | 100% (10/10) | $0.0030 | 8,792 | 0.9 | 22.1 s |
+| v9 repo map | 100% (10/10) | $0.0027 | 7,135 | 0.9 | 19.1 s |
+
+v8 and v9 kept the pass rate but raised token use and cost, so v7 remains the
+best measured configuration. They are kept as negative results.
 
 Per task:
 

@@ -1,0 +1,17 @@
+id: terminal-002-csv-summary
+category: feature
+difficulty: 2
+language: python
+title: CSV summary mishandles header and quoted amounts
+prompt: 'summarize.py reads a CSV with a header row and two columns, category and amount, from a file
+  argument or from stdin. It currently treats the header as data and cannot parse amounts that contain
+  thousands separators. Make it skip the first row, accept quoted amounts such as "1,234.50", sum per
+  category, and print `category,total` with exactly two decimals, sorted by category. A row with a missing
+  or unparseable amount must print `error: row N` to stderr, where N is the 1-based line number including
+  the header, and exit with code 2. Empty input exits with code 0 and prints nothing.'
+limits:
+  max_minutes: 10
+  max_files_changed: 2
+grade:
+  type: pytest
+  timeout: 120

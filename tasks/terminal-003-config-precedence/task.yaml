@@ -1,0 +1,16 @@
+id: terminal-003-config-precedence
+category: bugfix
+difficulty: 2
+language: python
+title: Config file overrides environment variables
+prompt: 'appconfig.py is documented to resolve configuration in this order: command line arguments, then
+  environment variables, then the JSON file named by APP_CONFIG, then defaults. It currently lets the
+  file win over the environment. Fix the precedence without changing the printed JSON shape. APP_PORT
+  is parsed as an integer and APP_DEBUG accepts 1, true, yes, or on case-insensitively. A missing APP_CONFIG
+  file is ignored. Only the keys host, port, and debug may come from the file.'
+limits:
+  max_minutes: 10
+  max_files_changed: 2
+grade:
+  type: pytest
+  timeout: 120

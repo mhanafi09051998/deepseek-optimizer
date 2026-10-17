@@ -93,7 +93,7 @@ def _parse(stdout: str) -> tuple[float, dict[str, int], int, list[str], dict[str
             if isinstance(text, str) and text.strip():
                 texts.append(text)
             continue
-        if event.get("type") == "tool":
+        if part.get("type") == "tool":
             name = str(part.get("tool") or "unknown")
             state = part.get("state") or {}
             output = state.get("output")

@@ -1,0 +1,38 @@
+diff --git a/appconfig.py b/appconfig.py
+index 35a5bd6..eea369c 100644
+--- a/appconfig.py
++++ b/appconfig.py
+@@ -5,23 +5,27 @@ import json
+ import os
+ 
+ DEFAULTS = {"host": "localhost", "port": 8000, "debug": False}
++TRUE_VALUES = ("1", "true", "yes", "on")
+ 
+ 
+ def load(overrides=None, env=None):
+     env = os.environ if env is None else env
+     config = dict(DEFAULTS)
+ 
++    path = env.get("APP_CONFIG")
++    if path and os.path.exists(path):
++        with open(path, encoding="utf-8") as handle:
++            file_values = json.load(handle)
++        for key in ("host", "port", "debug"):
++            if key in file_values:
++                config[key] = file_values[key]
++
+     if "APP_HOST" in env:
+         config["host"] = env["APP_HOST"]
+     if "APP_PORT" in env:
+         config["port"] = int(env["APP_PORT"])
+     if "APP_DEBUG" in env:
+-        config["debug"] = env["APP_DEBUG"].lower() in ("1", "true", "yes")
+-
+-    path = env.get("APP_CONFIG")
+-    if path and os.path.exists(path):
+-        with open(path, encoding="utf-8") as handle:
+-            config.update(json.load(handle))
++        config["debug"] = env["APP_DEBUG"].strip().lower() in TRUE_VALUES
+ 
+     overrides = overrides or {}
+     for key in ("host", "port", "debug"):

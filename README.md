@@ -1,220 +1,31 @@
 # deepseek-optimizer
 
-A reproducible benchmark for **agent harness optimization**: how much of a coding
-agent's performance comes from the scaffold around the model rather than the
-model itself?
+Harness optimization for coding agents. Same model, same tasks, different
+scaffold. Everything is measured, nothing is vibes.
 
-The project measures one model, [DeepSeek V4.1 Flash](https://www.deepseek.com),
-across six agent configurations and ten deterministic coding tasks. No
-fine-tuning, no distillation, no vendor benchmark reproduction. Just the
-harness, measured.
+**Headline result:** +10 pp pass rate, 42% lower cost per solved task, 97% less
+AI-slop output, 24% faster. The model never changed.
 
-## Why this exists
+## Benchmark
 
-DeepSeek's own V4.1 Flash release reports the same model, on the same benchmark,
-scored through eight different agent scaffolds:
+Ten deterministic coding tasks, one run each, same machine, same OpenCode
+version, `deepseek/deepseek-flash#high` throughout.
 
-| Scaffold | DeepSWE v1.1 | Terminal-Bench 2.1 |
-|---|---:|---:|
-| mini-SWE | 74.2 | 90.3 |
-| DeepSeek Harness Minimal | 72.6 | 90.6 |
-| DeepSeek Harness Standard | 70.5 | 85.8 |
-| Claude Code | 69.8 | 88.0 |
-| DeepSeek Harness PTC | 67.6 | 85.8 |
-| Pi | 66.2 | 86.1 |
-| Codex | 65.6 | 84.1 |
-| **OpenCode** | **65.5** | **85.0** |
+| Configuration | pass@1 | Cost / solved | Tokens / solved | Slop /1k | TB 4.0 | DeepSWE | AutomationBench |
+|---|---:|---:|---:|---:|---:|---:|---:|
+| DeepSeek V4.1 Flash, before (v0) | 90% (9/10) | $0.0036 | 6,460 | 27.7 | 31.2 | 74.2 | 54.8 |
+| DeepSeek V4.1 Flash, after (v7) | **100% (10/10)** | **$0.0021** | **5,890** | **0.9** | 31.2 | 74.2 | 54.8 |
+| DeepSeek V4.1 Flash, v8 tool budget | 100% | $0.0030 | 8,792 | 0.9 | 31.2 | 74.2 | 54.8 |
+| DeepSeek V4.1 Flash, v9 repo map | 100% | $0.0027 | 7,135 | 0.9 | 31.2 | 74.2 | 54.8 |
+| Claude Opus 5.5 | not run | n/a | n/a | n/a | 66.4 | not published | 40.0 |
+| GPT-6.1 Sol | not run | n/a | n/a | n/a | 58.2* | 75.2* | not published |
 
-An 8.7 point spread on DeepSWE, produced entirely by the software wrapped around
-the model. That is larger than the gap between the top three models in the same
-release (74.2 / 74.0 / 73.0, a 1.2 point range).
+Columns 2 to 5 are measured here. Columns 6 to 8 are vendor-published and apply
+to the model, not the harness, so they stay identical across the DeepSeek rows.
+Asterisked cells are third-party reproductions because the vendor published only
+relative gains.
 
-If the scaffold matters that much, it is worth optimizing deliberately. This
-repository provides the measurement rig to do it.
-
-## What it does
-
-```
-task fixture  ->  isolated git repo  ->  OpenCode agent + harness  ->  hidden tests  ->  record
-```
-
-Each run:
-
-1. copies a fixture repository into an isolated workspace,
-2. commits a baseline so the diff is measurable,
-3. installs one harness variant (`AGENTS.md` and nothing else),
-4. runs `opencode run --format json` with the task prompt,
-5. applies hidden tests the agent never saw,
-6. records pass/fail, cost, tokens, duration, files changed, diff size.
-
-## Quick start
-
-```sh
-pip install -e ".[dev]"
-dso list
-dso validate                      # every task must fail without its patch and pass with it
-dso eval --models flash-high --harnesses v0,v5 --repeats 2 \
-  --out results/raw/mvp.jsonl --report results/mvp.md
-```
-
-Requirements: Python 3.11+, Node 24 (for the TypeScript task), Git, and an
-authenticated OpenCode CLI (`opencode auth login`).
-
-## Harness ladder
-
-Each variant changes one variable relative to the previous one, except `v5`,
-which combines the winners.
-
-| Version | Change | Hypothesis |
-|---|---|---|
-| `v0` | no instructions | control |
-| `v1` | plan/act/verify workflow, tool policy | discipline beats improvisation |
-| `v2` | grep-first context strategy | fewer wasted tokens, fewer wrong files |
-| `v3` | mandatory verification loop | the agent checks its own work |
-| `v4` | explorer/implementer/reviewer roles | complex tasks need separation |
-| `v5` | converged configuration | combination outperforms each part |
-| `v6` | v5 plus a no-slop output contract | style is part of the product |
-| `v7` | v6 plus a token budget and one-pass editing | same correctness, fewer tokens |
-| `v8` | hard caps on tool calls and read ranges | most tokens are tool output |
-| `v9` | v8 plus a generated symbol map | less blind search, stable cache prefix |
-
-Harness files live in `harness/vN/AGENTS.md`. They are copied into the workspace
-and git-excluded, so they never appear in the measured diff.
-
-## Metrics
-
-| Metric | Why it matters |
-|---|---|
-| **pass@1** with bootstrap 95% CI | correctness, with uncertainty stated |
-| **cost per solved task** | the number that decides adoption |
-| **input tokens per solved task** | context efficiency at equal accuracy |
-| **files changed / diff lines** | precision, not just success |
-| **tool calls and tool output size** | where the input tokens actually go |
-| **cache hit ratio** | share of input served from the cheap cache tier |
-| **slop per 1k words** | output quality, not just output length |
-| **median wall time** | throughput |
-
-Cost comes from OpenCode's own per-step accounting, not from a hardcoded price
-table. `src/dso/models.yaml` pricing is only a fallback for reporting.
-
-## Token economy
-
-`v7` exists because correctness per token matters as much as correctness. Its
-rules: one narrow search before any read, ranges instead of whole files, no
-re-reading, no narration between tool calls, one edit pass per file, and a single
-verification run.
-
-Measured as input tokens per solved task, not tokens per run. A variant that
-saves tokens by failing tasks does not win.
-
-## Output hygiene
-
-Language models pad answers with formatting that carries no information:
-`**bold**` labels, em dashes, hyphen-as-connector, emoji, and stock phrases like
-"it's worth noting" or "I hope this helps".
-
-`v6` forbids those patterns in the final reply. `src/dso/slop.py` measures them
-by scanning the agent's text events, stripping code blocks first so real syntax
-is never counted. Reports include slop per 1000 words and a marker breakdown, and
-the same check is available directly:
-
-```sh
-dso slop runs/<run-id>/transcript.jsonl
-```
-
-The detector is deliberately conservative: it counts observable patterns, not
-taste.
-
-## Tasks
-
-Ten fixtures cover six categories:
-
-| Category | Tasks | What it tests |
-|---|---:|---|
-| comprehension | 1 | tracing configuration across modules |
-| bugfix | 3 | Python async cancellation, integer money math, TypeScript string handling |
-| feature | 3 | cursor pagination, retry with exponential backoff, thread-safe sliding window |
-| refactor | 1 | extracting a module without behavior change |
-| tests | 1 | writing tests that actually catch a bug (mutation graded) |
-| long-context | 1 | cascading cache invalidation across four modules |
-
-Every task is synthetic and self-contained: no proprietary code, no network, no
-package installs. See [CONTRIBUTING.md](CONTRIBUTING.md) to add one.
-
-## Anti-cheat
-
-- Grading tests live outside `repo/` and are copied in **after** the agent stops.
-- Test configuration files (`conftest.py`, `pytest.ini`, `setup.cfg`, `tox.ini`,
-  `sitecustomize.py`) may not be created or modified at the repo root.
-- `mutation` tasks require the agent's tests to **fail on the buggy code and pass
-  on the fixed code**. Tests that pass on both score zero.
-- A file-change budget is enforced per task.
-- `solution.patch` proves every task is solvable; `dso validate` runs both
-  directions on every commit.
-
-## Reference: vendor-published numbers
-
-This table is context, not a comparison with our results. These are numbers the
-vendors published, each measured with a different scaffold, effort setting, and
-harness. Scores in one column are not directly comparable to another column.
-
-| Benchmark | DeepSeek V4.1 Flash | Claude Opus 5.5 | GPT-6.1 Sol |
-|---|---:|---:|---:|
-| Terminal-Bench 4.0 | 31.2 | 66.4 | 58.2 ±3.1 |
-| DeepSWE v1.1 | 74.2 | not published | 75.2 |
-| AutomationBench | 54.8 | 40.0 | not published |
-| GPQA Diamond | 90.9 | not published | not published |
-| Humanity's Last Exam | 39.1 (no tools) | 67.7 (with tools) | not published |
-| FrontierCode v1.1 (Main) | not published | 54.4 | not published |
-| Terminal-Bench Science 0.1 | not published | 58.7 | not published |
-| OSWorld | not published | 81.8 (partial) | within 2.1 pp of Astra |
-
-Pricing, USD per million tokens:
-
-| Model | Input | Cached input | Output |
-|---|---:|---:|---:|
-| DeepSeek V4.1 Flash | 0.15 off-peak / 0.30 peak | 0.003 / 0.006 | 0.60 / 1.20 |
-| Claude Opus 5.5 | 4.00 | 0.20 | 20.00 |
-| GPT-6.1 Sol | 2.00 | 0.10 | 10.00 |
-
-Sources:
-
-- DeepSeek, V4.1 Flash model card, 10 Sep 2026.
-- Anthropic, "Introducing Claude Opus 5.5", 22 Sep 2026. Terminal-Bench 4.0 at
-  xhigh effort, AutomationBench at max effort.
-- OpenAI, "GPT-6.1 Sol", Sep 2026. The post reports relative gains for DeepSWE
-  and AutomationBench rather than a numeric table; the absolute Terminal-Bench
-  4.0 and DeepSWE figures above are third-party reproductions and are therefore
-  lower confidence than the other cells.
-
-Two caveats that matter more than the numbers:
-
-1. The HLE row compares tools against no tools. Do not read it as a capability
-   gap.
-2. DeepSeek's figures come from its own scaffolding table, where the same model
-   scored 65.5 to 74.2 on DeepSWE depending only on the harness. That spread,
-   8.7 points, is larger than the gap between the top models in the same
-   release, and it is the reason this repository exists.
-
-## Results
-
-Ten tasks, one run per task, same machine, same OpenCode version (v2.0.32),
-`deepseek/deepseek-flash#high` at both settings. The only variable is the
-harness.
-
-| Configuration | dso pass@1 | dso cost per solved | Terminal-Bench 4.0 | DeepSWE v1.1 | AutomationBench |
-|---|---:|---:|---:|---:|---:|
-| DeepSeek V4.1 Flash, before (v0) | 90% (9/10) | $0.0036 | 31.2 | 74.2 | 54.8 |
-| DeepSeek V4.1 Flash, after (v7) | **100% (10/10)** | **$0.0021** | 31.2 | 74.2 | 54.8 |
-| Claude Opus 5.5 | not measured | n/a | 66.4 | not published | 40.0 |
-| GPT-6.1 Sol | not measured | n/a | 58.2* | 75.2* | not published |
-
-The two `dso` columns are measured here. The three vendor columns are published
-figures and apply to the model, not to the harness, which is why they are
-identical in both DeepSeek rows. Asterisked cells are third-party reproductions
-because the vendor reported only relative gains.
-
-What changed between the two DeepSeek rows:
+### What moved, and what did not
 
 | Metric | v0 | v7 | Delta |
 |---|---:|---:|---:|
@@ -224,33 +35,81 @@ What changed between the two DeepSeek rows:
 | Slop markers per 1k words | 27.7 | 0.9 | -97% |
 | Median wall time | 22.8 s | 17.4 s | -24% |
 
-The single task v0 missed is `feature-001-pagination`; v7 solved it. With ten
-tasks, one task is ten percentage points, so treat the pass@1 delta as
-directional rather than statistically established. The cost, token, and style
-deltas are consistent across all ten runs and do not depend on that task.
+v8 and v9 did not beat v7. Capping tool calls and injecting a symbol map kept
+pass@1 at 100% but raised token use and cost. The honest reading: the token
+budget in v7 was already binding, and extra structure added overhead. They stay
+in the repo as negative results.
 
-Full per-task results: [docs/results-v1.md](docs/results-v1.md).
+With ten tasks, one task equals ten percentage points. Treat the pass@1 delta as
+directional. The cost, token, and style deltas are consistent across all runs.
 
-## Repository layout
+## How it works
 
 ```
-src/dso/        CLI, runner, grader, report
-tasks/          fixtures, hidden tests, reference patches
-harness/        v0..v5 agent instructions
-results/        generated reports and raw JSONL (gitignored)
-docs/           methodology and result write-ups
+fixture -> isolated git repo -> OpenCode agent + AGENTS.md -> hidden tests -> record
 ```
 
-## Limitations
+1. Copy the fixture into a fresh workspace and commit a baseline.
+2. Install one harness variant. It is an `AGENTS.md` file and nothing else.
+3. Run `opencode run --format json` with the task prompt.
+4. After the agent exits, copy in hidden tests it never saw and grade.
+5. Record pass, cost, tokens, cache share, diff size, wall time, slop markers.
 
-- Eight tasks is enough to validate a pipeline and detect large effects, not to
-  rank agents. Confidence intervals are reported for a reason.
-- Fixtures are synthetic. Real repositories have messier context and longer
-  feedback loops.
-- One model, one provider, one machine. Opencode version and model ID are
-  recorded per run so results remain comparable.
-- Vendor benchmark numbers quoted above are vendor-reported and use different
-  scaffolds; they motivate the work, they do not validate it.
+No fine-tuning, no distillation, no vendor benchmark reproduction.
+
+## Harness ladder
+
+| Version | Change | Outcome |
+|---|---|---|
+| v0 | no instructions | control |
+| v1 | plan, act, verify | discipline |
+| v2 | grep-first context | fewer wrong files |
+| v3 | mandatory verification | self-checking |
+| v4 | explorer, implementer, reviewer | role separation |
+| v5 | combined | converged |
+| v6 | v5 plus no-slop output contract | style |
+| v7 | v6 plus token budget | best measured result |
+| v8 | hard tool call caps | no gain |
+| v9 | v8 plus generated repo map | no gain |
+| v10 | bounded recovery loop | for long tasks |
+
+## Quick start
+
+```sh
+pip install -e ".[dev]"
+dso validate
+dso eval --models flash-high --harnesses v0,v7 --repeats 3
+dso report results/raw/run.jsonl --out results/summary.md
+```
+
+Requirements: Python 3.11+, Node 24, Git, and an authenticated OpenCode CLI.
+
+## Safe to import
+
+This repository does not execute anything on install or on import. There are no
+postinstall hooks, no setup scripts, and no git hooks.
+
+`dso` is a normal CLI. The harness only applies when you copy
+`harness/vN/AGENTS.md` into a project root on purpose. The benchmark is opt-in.
+
+## Layout
+
+```
+src/dso/     CLI, runner, grader, report, slop detector
+tasks/       13 fixtures with hidden tests and reference patches
+harness/     v0 to v10 agent instructions
+results/     generated reports, raw JSONL is gitignored
+docs/        methodology and full per-task results
+```
+
+## Limits
+
+1. Ten tasks detect large effects, not small ones. Intervals are reported.
+2. Fixtures are synthetic. Real repositories have messier context.
+3. Vendor numbers use different scaffolds. They motivate the work, not prove it.
+
+Full methodology: [docs/methodology.md](docs/methodology.md).
+Per-task results: [docs/results-v1.md](docs/results-v1.md).
 
 ## License
 

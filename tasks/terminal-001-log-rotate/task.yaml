@@ -1,0 +1,17 @@
+id: terminal-001-log-rotate
+category: feature
+difficulty: 2
+language: python
+title: Rotation order and retention are wrong
+prompt: logtool.py rotates *.log files but gets the order and retention wrong. Make `python logtool.py
+  <dir> --keep N` behave as follows. Only files ending in .log are candidates. The newest file by modification
+  time becomes <name>.log.1, the next newest becomes .2, and so on, with ties broken by file name. Files
+  beyond N are deleted. Any pre-existing *.log.<number> files are removed before rotating. An empty directory
+  succeeds with exit code 0. A keep value below 1 exits non-zero. The command must not touch files that
+  do not end in .log.
+limits:
+  max_minutes: 10
+  max_files_changed: 2
+grade:
+  type: pytest
+  timeout: 120

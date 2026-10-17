@@ -1,0 +1,52 @@
+diff --git a/summarize.py b/summarize.py
+index 939ad19..07b290f 100644
+--- a/summarize.py
++++ b/summarize.py
+@@ -2,13 +2,22 @@
+ 
+ import csv
+ import sys
++from decimal import Decimal, InvalidOperation
++
++
++def parse_amount(text):
++    cleaned = text.strip().replace(",", "")
++    try:
++        return Decimal(cleaned)
++    except InvalidOperation as exc:
++        raise ValueError(f"invalid amount: {text!r}") from exc
+ 
+ 
+ def summarize(rows):
+     totals = {}
+     for row in rows:
+-        category, amount = row[0], float(row[1])
+-        totals[category] = totals.get(category, 0.0) + amount
++        category, amount = row[0].strip(), parse_amount(row[1])
++        totals[category] = totals.get(category, Decimal("0")) + amount
+     return totals
+ 
+ 
+@@ -20,7 +29,21 @@ def main(argv=None):
+     else:
+         rows = list(csv.reader(sys.stdin))
+ 
+-    totals = summarize(rows)
++    if not rows:
++        return 0
++
++    totals = {}
++    for index, row in enumerate(rows[1:], start=2):
++        if len(row) < 2:
++            print(f"error: row {index}", file=sys.stderr)
++            return 2
++        try:
++            category, amount = row[0].strip(), parse_amount(row[1])
++        except ValueError:
++            print(f"error: row {index}", file=sys.stderr)
++            return 2
++        totals[category] = totals.get(category, Decimal("0")) + amount
++
+     for category in sorted(totals):
+         print(f"{category},{totals[category]:.2f}")
+     return 0
