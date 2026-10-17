@@ -26,6 +26,7 @@ this harness. They are labelled and sourced separately.
 | v8 tool budget | 100% (10/10) | $0.0030 | 8,792 | 0.9 | 22.1 s |
 | v9 repo map | 100% (10/10) | $0.0027 | 7,135 | 0.9 | 19.1 s |
 | v11 truncated tools | 100% (10/10) | $0.0020 | 5,690 | 0.0 | 16.3 s |
+| v13 error-safe truncation | 100% (10/10) | $0.0021 | 6,051 | 0.0 | 14.6 s |
 
 v8 and v9 kept the pass rate but raised token use and cost, so v7 remains the
 best measured configuration on tokens. v11 is 5% cheaper and 6% faster than v7,

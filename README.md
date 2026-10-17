@@ -18,6 +18,7 @@ version, `deepseek/deepseek-flash#high` throughout.
 | DeepSeek V4.1 Flash, v8 tool budget | 100% | $0.0030 | 8,792 | 0.9 | 31.2 | 74.2 | 54.8 |
 | DeepSeek V4.1 Flash, v9 repo map | 100% | $0.0027 | 7,135 | 0.9 | 31.2 | 74.2 | 54.8 |
 | DeepSeek V4.1 Flash, v11 truncated tools | 100% | $0.0020 | 5,690 | 0.0 | 31.2 | 74.2 | 54.8 |
+| DeepSeek V4.1 Flash, v13 error-safe truncation | 100% | $0.0021 | 6,051 | 0.0 | 31.2 | 74.2 | 54.8 |
 | Claude Opus 5.5 | not run | n/a | n/a | n/a | 66.4 | not published | 40.0 |
 | GPT-6.1 Sol | not run | n/a | n/a | n/a | 58.2* | 75.2* | not published |
 
@@ -39,9 +40,12 @@ relative gains.
 v8 and v9 did not beat v7. Capping tool calls and injecting a symbol map kept
 pass@1 at 100% but raised token use and cost. v11, which truncates every tool
 result at 4000 characters through an OpenCode plugin, is cheaper by 5% and
-faster by 6%, but its token reduction is inside run-to-run noise. The honest
-reading: on this task set, the token budget in v7 was already binding. All three
-stay in the repo as measured results, including the negative ones.
+faster by 6%, but its token reduction is inside run-to-run noise. v13 raises that
+cap to 8000 characters and keeps the tail whenever the output looks like an
+error, so large repositories do not lose tracebacks; it reaches 0.0 slop and the
+fastest median time (14.6 s) at the same cost as v7. The honest reading: on this
+task set, the token budget in v7 was already binding. All variants stay in the
+repo as measured results, including the negative ones.
 
 With ten tasks, one task equals ten percentage points. Treat the pass@1 delta as
 directional. The cost, token, and style deltas are consistent across all runs.
@@ -76,6 +80,8 @@ No fine-tuning, no distillation, no vendor benchmark reproduction.
 | v9 | v8 plus generated repo map | no gain |
 | v10 | bounded recovery loop | for long tasks |
 | v11 | plugin: truncate tool output at 4000 chars | -5% cost, tokens within noise |
+| v12 | v7 plus strict no-format output contract | slop near zero |
+| v13 | v12 plus error-safe truncation at 8000 chars | slop 0.0, fastest run |
 
 ## Quick start
 
