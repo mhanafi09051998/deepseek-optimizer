@@ -25,9 +25,17 @@ this harness. They are labelled and sourced separately.
 | v7 lean | 100% (10/10) | $0.0021 | 5,890 | 0.9 | 17.4 s |
 | v8 tool budget | 100% (10/10) | $0.0030 | 8,792 | 0.9 | 22.1 s |
 | v9 repo map | 100% (10/10) | $0.0027 | 7,135 | 0.9 | 19.1 s |
+| v11 truncated tools | 100% (10/10) | $0.0020 | 5,690 | 0.0 | 16.3 s |
 
 v8 and v9 kept the pass rate but raised token use and cost, so v7 remains the
-best measured configuration. They are kept as negative results.
+best measured configuration on tokens. v11 is 5% cheaper and 6% faster than v7,
+with a token delta inside noise, so the truncation plugin is a small win rather
+than a breakthrough.
+
+Three terminal-style tasks were added after this run. On those, v7 solved 3/3 at
+5,785 tokens per solved task and v11 solved 3/3 at 5,944, again within noise.
+Truncation only matters when tool output is large, and on these fixtures it
+rarely exceeds 4000 characters.
 
 Per task:
 

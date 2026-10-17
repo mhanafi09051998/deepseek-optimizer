@@ -53,8 +53,14 @@ def apply_harness(workspace: Path, harness: str) -> None:
 
     names: list[str] = []
     for item in sorted(source.iterdir()):
-        if item.is_file() and not item.name.startswith("README"):
-            shutil.copy2(item, workspace / item.name)
+        if item.name.startswith("README"):
+            continue
+        target = workspace / item.name
+        if item.is_dir():
+            shutil.copytree(item, target, dirs_exist_ok=True)
+            names.append(f"{item.name}/")
+        elif item.is_file():
+            shutil.copy2(item, target)
             names.append(item.name)
     _git_exclude(workspace, [*names, *IGNORED_ARTIFACTS])
 

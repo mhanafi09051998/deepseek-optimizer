@@ -67,3 +67,6 @@ harnesses:
   v10:
     label: Recovery loop
     description: v9 plus a bounded run-fix-rerun loop for long tasks.
+  v11:
+    label: Truncated tool output
+    description: v7 plus a plugin that cuts every tool result at 4000 chars.
